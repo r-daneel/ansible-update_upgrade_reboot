@@ -1,0 +1,43 @@
+---
+
+# file: roles/ansible-update_upgrade_reboot/tasks/main.yaml
+
+- name: set default remote_host
+  set_fact:
+    remote_host: '{{ inventory_hostname }}'
+  when: remote_host == ''
+
+- name: update apt cache
+  apt: update_cache=yes
+
+- name: upgrade packages
+  apt: upgrade=yes
+
+- name: autoremove unneeded packages
+  command: apt-get -y autoremove --purge
+  changed_when: false
+
+- name: cleanup apt
+  command: apt-get clean
+  changed_when: false
+
+- name: check if reboot is required
+  stat: path={{ reboot_required_file }}
+  register: reboot_required
+
+- name: restart server
+  command: shutdown -r now "Ansible updates triggered reboot"
+  when: reboot_required.stat.exists
+  async: '0'
+  poll: '0'
+  ignore_errors: true
+
+- name: wait for server
+  wait_for:
+    host: '{{ remote_host }}'
+    port: '{{ remote_ssh_port }}'
+    state: 'started'
+    delay: '5'
+    timeout: '600'
+  delegate_to: localhost
+  sudo: no

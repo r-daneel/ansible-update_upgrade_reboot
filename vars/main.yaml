@@ -1,0 +1,5 @@
+---
+
+# file: roles/ansible-update_upgrade_reboot/vars/main.yaml
+
+reboot_required_file: '/var/run/reboot-required'

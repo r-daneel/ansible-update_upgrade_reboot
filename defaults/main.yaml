@@ -1,0 +1,6 @@
+---
+
+# file: roles/ansible-update_upgrade_reboot/defaults/main.yaml
+
+remote_host: ''
+remote_ssh_port: '22'
