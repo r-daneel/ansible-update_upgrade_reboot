@@ -2,42 +2,35 @@
 
 # file: roles/ansible-update_upgrade_reboot/tasks/main.yaml
 
-- name: set default remote_host
-  set_fact:
-    remote_host: '{{ inventory_hostname }}'
-  when: remote_host == ''
+- name: update cache
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{ package_cache_valid_time }}"
 
-- name: update apt cache
-  apt: update_cache=yes
-
-- name: upgrade packages
-  apt: upgrade=yes
-
-- name: autoremove unneeded packages
-  command: apt-get -y autoremove --purge
-  changed_when: false
-
-- name: cleanup apt
-  command: apt-get clean
-  changed_when: false
+- name: upgrade all packages
+  apt:
+    upgrade: "full"
+    purge: true
+    autoclean: true
+    autoremove: true
 
 - name: check if reboot is required
-  stat: path={{ reboot_required_file }}
+  stat:
+    path: "{{ reboot_required_file }}"
   register: reboot_required
 
 - name: restart server
-  command: shutdown -r now "Ansible updates triggered reboot"
+  shell: sleep 3; shutdown -r now "Ansible updates triggered reboot"
   when: reboot_required.stat.exists
-  async: '0'
-  poll: '0'
+  async: true
+  poll: 0
   ignore_errors: true
+  register: rebooting
 
-- name: wait for server
-  wait_for:
-    host: '{{ remote_host }}'
-    port: '{{ remote_ssh_port }}'
-    state: 'started'
-    delay: '5'
-    timeout: '600'
-  delegate_to: localhost
-  sudo: no
+- name: wait for server to be back online (if rebooted)
+  wait_for_connection:
+    connection_timeout: "{{ reboot_wait_server_connection_timeout }}"
+    delay: "{{ reboot_wait_delay }}"
+    sleep: "{{ reboot_wait_interval }}"
+    timeout: "{{ reboot_wait_timeout }}"
+  when: rebooting is changed
