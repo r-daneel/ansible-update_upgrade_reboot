@@ -29,7 +29,7 @@
 
 - name: wait for server to be back online (if rebooted)
   wait_for_connection:
-    connection_timeout: "{{ reboot_wait_server_connection_timeout }}"
+    connect_timeout: "{{ reboot_wait_server_connection_timeout }}"
     delay: "{{ reboot_wait_delay }}"
     sleep: "{{ reboot_wait_interval }}"
     timeout: "{{ reboot_wait_timeout }}"
