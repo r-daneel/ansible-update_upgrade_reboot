@@ -2,6 +2,10 @@
 
 # file: roles/ansible-update_upgrade_reboot/defaults/main.yaml
 
+# perform a reboot if updates require it, defaults to 'False'
+# set this to 'True' if it is the desired behaviour
+update_upgrade_reboot_allow_reboot: False
+
 # time the apt cache is valid before querying the repositories again (seconds)
 package_cache_valid_time: 1800
 

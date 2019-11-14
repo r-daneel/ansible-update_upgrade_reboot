@@ -19,9 +19,11 @@
     path: "{{ reboot_required_file }}"
   register: reboot_required
 
-- name: restart server
+- name: restart server (if reboot required & allowed)
   shell: sleep 3; shutdown -r now "Ansible updates triggered reboot"
-  when: reboot_required.stat.exists
+  when:
+    - reboot_required.stat.exists
+    - update_upgrade_reboot_allow_reboot|bool
   async: true
   poll: 0
   ignore_errors: true
@@ -33,4 +35,15 @@
     delay: "{{ reboot_wait_delay }}"
     sleep: "{{ reboot_wait_interval }}"
     timeout: "{{ reboot_wait_timeout }}"
-  when: rebooting is changed
+  when:
+    - rebooting is changed
+
+- name: notice
+  debug:
+    msg: |
+      WARNING: Reboot was required, but not allowed.
+               Set 'update_upgrade_reboot_allow_reboot: True'
+               in order to perform an automated reboot.
+  when:
+    - reboot_required.stat.exists
+    - not update_upgrade_reboot_allow_reboot|bool
