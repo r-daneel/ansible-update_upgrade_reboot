@@ -6,6 +6,7 @@
   apt:
     update_cache: yes
     cache_valid_time: "{{ package_cache_valid_time }}"
+  changed_when: false
 
 - name: upgrade all packages
   apt:
