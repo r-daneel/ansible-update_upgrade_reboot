@@ -7,16 +7,16 @@
 update_upgrade_reboot_allow_reboot: False
 
 # time the apt cache is valid before querying the repositories again (seconds)
-package_cache_valid_time: 1800
+update_upgrade_reboot_package_cache_valid_time: 1800
 
 # how long to wait before poking at a rebooting server (seconds)
-reboot_wait_delay: '5'
-
-# how long to wait for the server connection (seconds)
-reboot_wait_server_connection_timeout: '5'
-
-# how long to wait between connection attempts (seconds)
-reboot_wait_interval: '1'
+update_upgrade_reboot_wait_delay: '5'
 
 # how long to wait for the server to reboot (seconds)
-reboot_wait_timeout: '600'
+update_upgrade_reboot_wait_timeout: '600'
+
+# how long to wait in between retry loops
+update_upgrade_reboot_retry_loop_delay: '10'
+
+# how many times we loop before timing out
+update_upgrade_reboot_max_retry_loops: '90'

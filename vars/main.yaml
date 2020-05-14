@@ -1,5 +1,9 @@
 ---
 
-# file: roles/ansible-update_upgrade_reboot/vars/main.yaml
+# file: roles/update_upgrade_reboot/vars/main.yaml
 
-reboot_required_file: '/var/run/reboot-required'
+update_upgrade_reboot_restart_required_file: '/var/run/reboot-required'
+
+# restart message
+
+update_upgrade_reboot_restart_message: "Reboot initiated by Ansible (role '{{ role_name }}')"

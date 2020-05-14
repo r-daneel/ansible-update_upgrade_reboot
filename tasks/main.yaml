@@ -2,49 +2,43 @@
 
 # file: roles/ansible-update_upgrade_reboot/tasks/main.yaml
 
-- name: update cache
+- name: Update cache
   apt:
     update_cache: yes
-    cache_valid_time: "{{ package_cache_valid_time }}"
+    cache_valid_time: "{{ update_upgrade_reboot_package_cache_valid_time }}"
   changed_when: false
 
-- name: upgrade all packages
+- name: Upgrade all packages
   apt:
     upgrade: "full"
     purge: true
     autoclean: true
     autoremove: true
+  retries: "{{ update_upgrade_reboot_max_retry_loops }}"
+  delay: "{{ update_upgrade_reboot_retry_loop_delay }}"
+  register: update_upgrade_reboot_wait_loop
+  until: update_upgrade_reboot_wait_loop is succeeded
 
-- name: check if reboot is required
+- name: Check if reboot is required
   stat:
-    path: "{{ reboot_required_file }}"
-  register: reboot_required
+    path: "{{ update_upgrade_reboot_restart_required_file }}"
+  register: update_upgrade_reboot_restart_required
 
-- name: restart server (if reboot required & allowed)
-  shell: sleep 3; shutdown -r now "Ansible updates triggered reboot"
+- name: Restart server (if reboot required & allowed)
+  reboot:
+    msg: "{{ update_upgrade_reboot_restart_message }}"
+    post_reboot_delay: "{{ update_upgrade_reboot_wait_delay }}"
+    reboot_timeout: "{{ update_upgrade_reboot_wait_timeout }}"
   when:
-    - reboot_required.stat.exists
+    - update_upgrade_reboot_restart_required.stat.exists
     - update_upgrade_reboot_allow_reboot|bool
-  async: true
-  poll: 0
-  ignore_errors: true
-  register: rebooting
 
-- name: wait for server to be back online (if rebooted)
-  wait_for_connection:
-    connect_timeout: "{{ reboot_wait_server_connection_timeout }}"
-    delay: "{{ reboot_wait_delay }}"
-    sleep: "{{ reboot_wait_interval }}"
-    timeout: "{{ reboot_wait_timeout }}"
-  when:
-    - rebooting is changed
-
-- name: notice
+- name: Notice
   debug:
     msg: |
       WARNING: Reboot was required, but not allowed.
                Set 'update_upgrade_reboot_allow_reboot: True'
                in order to perform an automated reboot.
   when:
-    - reboot_required.stat.exists
+    - update_upgrade_reboot_restart_required.stat.exists
     - not update_upgrade_reboot_allow_reboot|bool
