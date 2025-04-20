@@ -19,10 +19,24 @@
   register: update_upgrade_reboot_wait_loop
   until: update_upgrade_reboot_wait_loop is succeeded
 
-- name: Check if reboot is required
+- name: Check if updates require a reboot
   stat:
     path: "{{ update_upgrade_reboot_restart_required_file }}"
   register: update_upgrade_reboot_restart_required
+
+- name: Set reboot flag
+  set_fact:
+    update_upgrade_reboot_restart_requested: true
+  when:
+    update_upgrade_reboot_restart_required.stat.exists | default(false)
+
+- name: Force reboot flag
+  set_fact:
+    update_upgrade_reboot_restart_requested: true
+    update_upgrade_reboot_allow_reboot: true
+  when:
+    - update_upgrade_reboot_force_reboot | default(false)
+    - update_upgrade_reboot_wait_loop is changed
 
 - name: Restart server (if reboot required & allowed)
   reboot:
@@ -30,7 +44,7 @@
     post_reboot_delay: "{{ update_upgrade_reboot_wait_delay }}"
     reboot_timeout: "{{ update_upgrade_reboot_wait_timeout }}"
   when:
-    - update_upgrade_reboot_restart_required.stat.exists
+    - update_upgrade_reboot_restart_requested | default(false)
     - update_upgrade_reboot_allow_reboot|bool
 
 - name: Notice

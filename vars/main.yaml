@@ -7,3 +7,7 @@ update_upgrade_reboot_restart_required_file: '/var/run/reboot-required'
 # restart message
 
 update_upgrade_reboot_restart_message: "Reboot initiated by Ansible (role '{{ role_name }}')"
+
+# restart flag
+
+update_upgrade_reboot_restart_requested: false

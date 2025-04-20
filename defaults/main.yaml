@@ -6,6 +6,10 @@
 # set this to 'True' if it is the desired behaviour
 update_upgrade_reboot_allow_reboot: False
 
+# force a reboot regardless of system's indication, defaults to 'False'
+# set this to 'True' if it is the desired behaviour
+update_upgrade_reboot_force_reboot: False
+
 # time the apt cache is valid before querying the repositories again (seconds)
 update_upgrade_reboot_package_cache_valid_time: 1800
 
